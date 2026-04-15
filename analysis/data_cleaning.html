@@ -631,7 +631,7 @@ cutoff &lt;- median_time - 2 * sd_time
 
 # Filter (on all data)
 dat_clean8 &lt;- dat_clean7 %&gt;%
-  dplyr::filter(!is.na(duration_in_seconds) &amp; duration_in_seconds &gt;= cutoff)
+  filter(!is.na(duration_in_seconds) &amp; duration_in_seconds &gt;= cutoff)
 
 # sample size after filtering
 n_after &lt;- nrow(dat_clean8)
