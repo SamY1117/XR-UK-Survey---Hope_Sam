@@ -1,0 +1,133 @@
+---
+title: "CFA"
+author: "Sam"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+# visualisation
+# prepare for plotting
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+hope_vars <- paste0("hope_", 1:7)
+
+hope_long <- dat_clean8 %>%
+  select(all_of(hope_vars)) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "item",
+    values_to = "score"
+  )
+
+```
+
+```{r}
+# histogram
+ggplot(hope_long, aes(x = score)) +
+  geom_bar() +
+  facet_wrap(~ item, ncol = 4) +
+  labs(
+    title = "Distribution of Hope Items",
+    x = "Response",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# boxplot
+ggplot(hope_long, aes(x = item, y = score)) +
+  geom_boxplot() +
+  labs(
+    title = "Boxplot of Hope Items",
+    x = "Item",
+    y = "Score"
+  ) +
+  theme_minimal()
+
+# Diagnosis
+dat_clean8 %>%
+  summarise(across(all_of(hope_vars),
+                   list(mean = ~mean(.x, na.rm = TRUE),
+                        sd = ~sd(.x, na.rm = TRUE))))
+```
+
+```{r}
+# correlation matrix 
+
+hope_data <- dat_clean8 %>%
+  dplyr::select(all_of(hope_vars))
+
+cor_matrix <- cor(hope_data, use = "pairwise.complete.obs")
+cor_matrix[upper.tri(cor_matrix)] <- NA
+cor_matrix
+
+cor_long <- reshape2::melt(cor_matrix, na.rm = TRUE)
+
+ggplot(cor_long, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  geom_text(aes(label = round(value, 2))) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  theme_minimal() +
+  labs(title = "Correlation Matrix of Hope Items")
+
+```
+
+```{r}
+# CFA
+library(lavaan)
+
+# specify models
+model_1factor <- '
+Hope =~ hope_1 + hope_2 + hope_3 + hope_4 + hope_5 + hope_6 + hope_7
+'
+model_2factor <- '
+Affective =~ hope_1 + hope_2 + hope_6 + hope_7
+Cognitive =~ hope_3 + hope_4 + hope_5
+'
+
+# test default for ordinal data
+#fit_1 <- cfa(model_1factor, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+#fit_2 <- cfa(model_2factor, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+
+# preregistered method
+fit_1 <- cfa(model_1factor, data = hope_data, estimator = "MLR", missing = "fiml")
+fit_2 <- cfa(model_2factor, data = hope_data, estimator = "MLR", missing = "fiml")
+
+# results
+fit_1_result <- summary(fit_1, fit.measures = TRUE, standardized = TRUE)
+fit_2_result <- summary(fit_2, fit.measures = TRUE, standardized = TRUE)
+
+#fit measures
+rbind(
+  Model1 = fitMeasures(fit_1, c("cfi","tli","rmsea","srmr","aic","bic")),
+  Model2 = fitMeasures(fit_2, c("cfi","tli","rmsea","srmr","aic","bic"))
+)
+
+```
+```{r}
+# alternative model
+
+model_2x2 <- '
+Affective =~ hope_1 + hope_2
+Cognitive =~ hope_3 + hope_4
+'
+
+fit_2x2 <- cfa(
+  model_2x2,
+  data = hope_data,
+  estimator = "MLR",
+  missing = "fiml"
+)
+
+summary(fit_2x2, fit.measures = TRUE, standardized = TRUE)
+
+lavInspect(fit_2x2, "cor.lv")
+standardizedSolution(fit_2x2)
+```
+
+```{r}
+
+```
+

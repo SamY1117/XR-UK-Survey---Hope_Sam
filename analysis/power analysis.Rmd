@@ -1,0 +1,55 @@
+---
+title: "power analysis"
+author: "Sam"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+install.packages("semPower")
+install.packages("lavaan")
+library(semPower)
+library(lavaan)
+
+model_2factor <- '
+factor1 =~ x1 + x2 + x3 + x4
+factor2 =~ x5 + x6 + x7
+
+factor1 ~~ factor2
+'
+model_1factor <- '
+factor1 =~ X1 + x2 + x3 + x4 + x5 + x6 + x7
+
+'
+
+cfa_2factor_lib <- semPower.aPriori(0.08,
+                             'RMSEA',
+                             alpha = .05,
+                             power = .95,
+                             df = semPower.getDf(model_2factor))
+
+cfa_2factor_con <- semPower.aPriori(0.06,
+                             'RMSEA',
+                             alpha = .05,
+                             power = .95,
+                             df = semPower.getDf(model_2factor))
+
+cfa_1factor_lib <- semPower.aPriori(0.08,
+                             'RMSEA',
+                             alpha = .05,
+                             power = .95,
+                             df = semPower.getDf(model_1factor))
+
+cfa_1factor_con <- semPower.aPriori(0.06,
+                             'RMSEA',
+                             alpha = .05,
+                             power = .95,
+                             df = semPower.getDf(model_1factor))
+
+summary(cfa_2factor_lib$requiredN)
+summary(cfa_2factor_con$requiredN)
+summary(cfa_1factor_lib$requiredN)
+summary(cfa_1factor_con$requiredN)
+
+
+```
