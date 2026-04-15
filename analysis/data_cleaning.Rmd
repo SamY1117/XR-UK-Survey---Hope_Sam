@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 # Loading packages
 #install.packages(c("tidyverse", "janitor", "skimr", "naniar"))
 library(tidyverse)
@@ -18,7 +18,7 @@ library(naniar)
 ```{r}
 # formatting
 
-raw <- read_csv("C:/Users/61457/Desktop/Masters/Internship/data/XR UK Survey Sam.csv",
+raw <- read_csv("C:/Users/61457/Desktop/Masters/Internship/project/data/XR UK Survey Sam.csv",
                 show_col_types = FALSE)
 # clean names
 dat <- raw %>% clean_names()
@@ -37,9 +37,8 @@ cat("Removed (no consent):", n_no_consent, "participants\n")
 
 # number of participants who did not reply about withdrawing from the study 
 # mainly due to incomplete 
-n_no_response <- dat %>%
-  filter(ethics == 1) %>%
-  filter(is.na(project_description)) %>%
+n_no_response <- dat %>% 
+  filter(ethics == 1 & is.na(project_description)) %>%
   nrow()
 
 cat("Removed (no response at end):", n_no_response, "participants\n")
@@ -319,6 +318,6 @@ cat("Removed (too fast responses):", n_before - n_after, "participants\n")
 cat("Remaining:", n_after, "participants\n")
 ```
 ```{r}
-write.csv(dat_clean8, "dat_clean8.csv", row.names = FALSE)
+#write.csv(dat_clean8, "dat_clean8.csv", row.names = FALSE)
 ```
 
