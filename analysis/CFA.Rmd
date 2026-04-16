@@ -1,6 +1,6 @@
 ---
 title: "CFA"
-author: "Sam"
+author: "Sam Yu"
 date: "`r Sys.Date()`"
 output: html_document
 ---
@@ -11,11 +11,12 @@ output: html_document
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(reshape2)
 
-hope_vars <- paste0("hope_", 1:7)
+hope_items <- paste0("hope_", 1:7)
 
 hope_long <- dat_clean8 %>%
-  select(all_of(hope_vars)) %>%
+  select(all_of(hope_items)) %>%
   pivot_longer(
     cols = everything(),
     names_to = "item",
@@ -48,7 +49,7 @@ ggplot(hope_long, aes(x = item, y = score)) +
 
 # Diagnosis
 dat_clean8 %>%
-  summarise(across(all_of(hope_vars),
+  summarise(across(all_of(hope_items),
                    list(mean = ~mean(.x, na.rm = TRUE),
                         sd = ~sd(.x, na.rm = TRUE))))
 ```
@@ -57,13 +58,13 @@ dat_clean8 %>%
 # correlation matrix 
 
 hope_data <- dat_clean8 %>%
-  dplyr::select(all_of(hope_vars))
+  select(all_of(hope_items))
 
 cor_matrix <- cor(hope_data, use = "pairwise.complete.obs")
 cor_matrix[upper.tri(cor_matrix)] <- NA
 cor_matrix
 
-cor_long <- reshape2::melt(cor_matrix, na.rm = TRUE)
+cor_long <- melt(cor_matrix, na.rm = TRUE)
 
 ggplot(cor_long, aes(Var1, Var2, fill = value)) +
   geom_tile() +
@@ -82,6 +83,7 @@ library(lavaan)
 model_1factor <- '
 Hope =~ hope_1 + hope_2 + hope_3 + hope_4 + hope_5 + hope_6 + hope_7
 '
+
 model_2factor <- '
 Affective =~ hope_1 + hope_2 + hope_6 + hope_7
 Cognitive =~ hope_3 + hope_4 + hope_5
@@ -106,28 +108,23 @@ rbind(
 )
 
 ```
-```{r}
-# alternative model
 
-model_2x2 <- '
-Affective =~ hope_1 + hope_2
-Cognitive =~ hope_3 + hope_4
-'
 
-fit_2x2 <- cfa(
-  model_2x2,
-  data = hope_data,
-  estimator = "MLR",
-  missing = "fiml"
-)
-
-summary(fit_2x2, fit.measures = TRUE, standardized = TRUE)
-
-lavInspect(fit_2x2, "cor.lv")
-standardizedSolution(fit_2x2)
-```
 
 ```{r}
+# reliability check
+library(psych)
+hope_items <- dat_clean8 %>%
+  select(paste0("hope_", 1:7))
 
+alpha_iv <- alpha(hope_items)
+omega_iv <- omega(hope_items, nfactors = 1)
+
+alpha_iv$item.stats
+
+
+#cat("Alpha:", alpha_iv, "\n")
+#cat("Omega:", omega_iv, "\n")
 ```
+
 

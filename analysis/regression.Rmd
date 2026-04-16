@@ -1,0 +1,183 @@
+---
+title: "Regression"
+author: "Sam Yu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+
+```
+
+
+```{r}
+# define DV
+intention_items <- dat_clean8 %>%
+  select(paste0("action_intentions_", 1:15))
+
+alpha_dv <- alpha(intention_items)
+
+alpha_dv
+
+omega_dv <- omega(intention_items)
+
+omega_dv
+```
+
+```{r}
+# DV quality check
+# visualisation prepare
+intention_long <- dat_clean8 %>%
+  select(paste0("action_intentions_", 1:15)) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "item",
+    values_to = "score"
+  )
+```
+
+```{r}
+# histogram
+ggplot(intention_long, aes(x = score)) +
+  geom_bar() +
+  facet_wrap(~ item, ncol = 4) +
+  labs(
+    title = "Distribution of Intention Items",
+    x = "Response",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# boxplot
+ggplot(intention_long, aes(x = item, y = score)) +
+  geom_boxplot() +
+  labs(
+    title = "Boxplot of Intention Items",
+    x = "Item",
+    y = "Score"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+# zero order correlation 
+# create intention composite score
+
+dat_clean8$intention_composite <- rowMeans(intention_items)
+
+# hope x intention composite
+cor_hope_intention <- cor(
+  hope_data,
+  dat_clean8$intention_composite,
+  use = "pairwise.complete.obs"
+)
+
+cor_hope_intention
+
+# hope x intention items
+cor_matrix <- cor(
+  hope_data,
+  intention_items,
+  use = "pairwise.complete.obs"
+)
+
+cor_matrix
+
+```
+
+```{r}
+# item level regression
+# each item
+model_h1 <- lm(intention_composite ~ hope_1, data = dat_clean8)
+model_h2 <- lm(intention_composite ~ hope_2, data = dat_clean8)
+model_h3 <- lm(intention_composite ~ hope_3, data = dat_clean8)
+model_h4 <- lm(intention_composite ~ hope_4, data = dat_clean8)
+model_h5 <- lm(intention_composite ~ hope_5, data = dat_clean8)
+model_h6 <- lm(intention_composite ~ hope_6, data = dat_clean8)
+model_h7 <- lm(intention_composite ~ hope_7, data = dat_clean8)
+
+summary(model_h1)
+summary(model_h2)
+summary(model_h3)
+summary(model_h4)
+summary(model_h5)
+summary(model_h6)
+summary(model_h7)
+
+
+# overall
+model_all <- lm(intention_composite ~ hope_1 + hope_2 + hope_3 + hope_4 + hope_5 + hope_6 + hope_7,
+                data = dat_clean8)
+
+summary(model_all)
+```
+
+```{r}
+# further exploratory analysis: considering active vs passive hope. 
+# creating active and passive
+dat_clean8$hope_active  <- rowMeans(dat_clean8 %>% select(paste0("hope_", 1:4)), na.rm = TRUE)
+dat_clean8$hope_passive <- rowMeans(dat_clean8 %>% select(paste0("hope_", 5:7)), na.rm = TRUE)
+
+model_activspass <- lm(intention_composite ~ hope_active + hope_passive, data = dat_clean8)
+summary(model_activspass)
+
+# within active -> affective vs cognitive
+dat_clean8$hope_active_affective  <- rowMeans(dat_clean8 %>% select(paste0("hope_", 1:2)), na.rm = TRUE)
+dat_clean8$hope_active_cognitive <- rowMeans(dat_clean8 %>% select(paste0("hope_", 3:4)), na.rm = TRUE)
+
+model_active_affvscog <- lm(intention_composite ~ hope_active_affective + hope_active_cognitive, data = dat_clean8)
+summary(model_active_affvscog)
+
+
+```
+
+```{r}
+# testing difference between cognitive hope and efficacy 
+
+#hope_cog <- dat_clean8 %>% 
+#  select(paste0("hope_", 3:4))
+
+hope <- dat_clean8 %>%
+  select(paste0("hope_", 1:4))
+
+efficacy_items <- dat_clean8 %>% 
+  select(paste0("collective_efficacy_", 1:7))
+
+cor_matrix <- cor(
+  hope,
+  efficacy_items,
+  use = "pairwise.complete.obs"
+)
+
+cor_matrix 
+
+# heatmap
+cor_hope_efficacy <- as.data.frame(cor_matrix) %>%
+  rownames_to_column(var = "hope") %>%
+  pivot_longer(
+    cols = -hope,
+    names_to = "efficacy",
+    values_to = "r"
+  )
+
+ggplot(cor_hope_efficacy, aes(x = efficacy, y = hope, fill = r)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = round(r, 2)), size = 3) +
+  scale_fill_gradient(
+  low = "#f7fbff",   
+  high = "#cb181d",  
+  limits = c(0, 0.5)
+)+
+  theme_minimal() +
+  labs(
+    x = "Collective Efficacy Items",
+    y = "Hope Items",
+    fill = "r"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+```
+

@@ -1,6 +1,6 @@
 ---
 title: "Data_Cleaning"
-author: "Sam"
+author: "Sam Yu"
 date: "`r Sys.Date()`"
 output: html_document
 ---
@@ -36,11 +36,11 @@ cat("Removed (no consent):", n_no_consent, "participants\n")
 
 # number of participants who did not reply about withdrawing from the study 
 # mainly due to incomplete 
-n_no_response <- dat %>% 
-  filter(ethics == 1 & is.na(project_description)) %>%
-  nrow()
+# n_no_response <- dat %>% 
+#   filter(ethics == 1 & is.na(project_description)) %>%
+#   nrow()
 
-cat("Removed (no response at end):", n_no_response, "participants\n")
+# cat("Removed (no response at end):", n_no_response, "participants\n")
 
 # number of participants who chose to withdrew their data
 n_withdraw <- dat %>%
@@ -57,10 +57,15 @@ cat("Removed (chose to withdraw):", n_withdraw, "participants\n")
 n_before <- nrow(dat)
 
 # filter
+# dat_clean1 <- dat %>%
+#   filter(
+#     !is.na(ethics) & !is.na(project_description) &
+#     ethics != 0 & project_description != 1
+#   )
+
 dat_clean1 <- dat %>%
   filter(
-    !is.na(ethics) & !is.na(project_description) &
-    ethics != 0 & project_description != 1
+    ethics == 1 & (is.na(project_description) | project_description != 1)
   )
 
 # sample size after filtering
@@ -79,7 +84,7 @@ n_before <- nrow(dat_clean1)
 
 # filter
 dat_clean2 <- dat_clean1 %>%
-  filter(age >= 18)
+  filter(is.na(project_description) | age >= 18)
 
 # sample size after filtering
 n_after <- nrow(dat_clean2)
@@ -158,6 +163,7 @@ dat_clean4 <- dat_clean3 %>%
   rowwise() %>%
   filter(
     !all(c_across(all_of(participation_bat)) == 1, na.rm = TRUE)
+    # 1 = Never
   ) %>%
   ungroup()
 
