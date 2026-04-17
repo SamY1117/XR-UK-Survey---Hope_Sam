@@ -1,3 +1,6 @@
 # XR-UK-Survey---Hope_Sam
 The analysis folder contains all relevant analyses for the project. 
 The data folder has been hidden since the data is not yet publicly available. 
+
+# Description of the Project
+This study investigates the structure and role of hope in climate collective action among UK climate activists. Although hope is widely discussed in this context, it has often been conceptualised as an affective experience or as a cognitive evaluation. These perspectives are often measured separately in empirical research, making it difficult to understand how different aspects of hope relate to collective action. To address this, the present study examines whether hope is better represented as a single construct or as two components using confirmatory factor analyses. We then test how hope, as either a single or dual construct, is associated with collective action intention. Climate activists’ data will be collected via an online survey. By integrating different conceptualisations of hope and reflecting their definitions in the measurement, this study aims to provide a more precise understanding of hope and its relationship to collective action intentions among climate activists. 
