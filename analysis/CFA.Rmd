@@ -56,7 +56,6 @@ dat_clean8 %>%
 
 ```{r}
 # correlation matrix 
-
 hope_data <- dat_clean8 %>%
   select(all_of(hope_items))
 
@@ -109,8 +108,6 @@ rbind(
 
 ```
 
-
-
 ```{r}
 # reliability check
 library(psych)
@@ -126,5 +123,41 @@ alpha_iv$item.stats
 #cat("Alpha:", alpha_iv, "\n")
 #cat("Omega:", omega_iv, "\n")
 ```
+
+
+```{r}
+# Deleting items with less than .4 factor loading (item 5 and 6)
+
+# specify models
+model_1factor_re <- '
+Hope =~ hope_1 + hope_2 + hope_3 + hope_4 + hope_7
+'
+
+model_2factor_re <- '
+Affective =~ hope_1 + hope_2 + hope_7
+Cognitive =~ hope_3 + hope_4
+'
+
+# test default for ordinal data
+#fit_1 <- cfa(model_1factor, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+#fit_2 <- cfa(model_2factor, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+
+# preregistered method
+fit_1_re <- cfa(model_1factor_re, data = hope_data, estimator = "MLR", missing = "fiml")
+fit_2_re <- cfa(model_2factor_re, data = hope_data, estimator = "MLR", missing = "fiml")
+
+# results
+fit_1_re_result <- summary(fit_1_exp, fit.measures = TRUE, standardized = TRUE)
+fit_2_re_result <- summary(fit_2_exp, fit.measures = TRUE, standardized = TRUE)
+
+#fit measures
+rbind(
+  Model1 = fitMeasures(fit_1_re, c("cfi","tli","rmsea","srmr","aic","bic")),
+  Model2 = fitMeasures(fit_2_re, c("cfi","tli","rmsea","srmr","aic","bic"))
+)
+```
+
+
+
 
 

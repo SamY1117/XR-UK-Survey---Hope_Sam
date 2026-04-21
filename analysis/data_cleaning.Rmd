@@ -21,11 +21,25 @@ raw <- read_csv("C:/Users/61457/Desktop/Masters/Internship/project/data/XR UK Su
                 show_col_types = FALSE)
 # clean names
 dat <- raw %>% clean_names()
+
+# Duplication detect
+# Detect duplicated responses based on participant_id_1:3
+dup_id <- dat %>%
+  mutate(id_combo = paste(participant_id_1, participant_id_2, participant_id_3, sep = "_")) %>%
+  filter(!is.na(participant_id_1) & !is.na(participant_id_2) & !is.na(participant_id_3)) %>%
+  group_by(id_combo) %>%
+  filter(n() > 1) %>%
+  ungroup()
+
+# Number of duplicated rows
+n_dup <- nrow(dup_id)
+
+cat("Duplicated responses detected:", n_dup, "rows\n")
 ```
 
 
 ```{r}
-# removing people who do not give consent 
+# removing people who do not give consent - output: dat_clean1
 
 # number of participants not giving consent 
 n_no_consent <- dat %>%
@@ -74,10 +88,19 @@ n_after <- nrow(dat_clean1)
 # output: removed n 
 cat("Removed (total):", n_before - n_after, "participants\n")
 cat("Remaining:", n_after, "participants\n")
+
+# quick look at where people drop out. 
+ggplot(dat_clean1, aes(x = progress)) +
+  geom_histogram(binwidth = 3, fill = "steelblue", color = "white") +
+  scale_x_continuous(breaks = seq(0, 100, by = 3)) +
+  labs(title = "Distribution of Progress", x = "Progress", y = "Count") +
+  theme_minimal()
+
+
 ```
 
 ```{r}
-#removing under 18
+#removing under 18  - output: dat_clean2
 
 # sample size to start with
 n_before <- nrow(dat_clean1)
@@ -130,7 +153,7 @@ dat_clean2 <- dat_clean2 %>%
 
 
 ```{r}
-# data quality: attention check
+# data quality: attention check  - output: dat_clean3
 
 # sample size to start with
 n_before <- nrow(dat_clean2)

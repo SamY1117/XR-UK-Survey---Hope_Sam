@@ -1,0 +1,31 @@
+---
+title: "EFA"
+author: "Sam Yu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(psych)
+
+hope_items <- dat_clean8 %>%
+  select(paste0("hope_", 1:7))
+
+```
+
+```{r}
+KMO(hope_items)
+cortest.bartlett(hope_items)
+
+fa.parallel(hope_items, fa = "fa")
+```
+
+```{r}
+
+efa_3 <- fa(hope_items, nfactors = 3, rotate = "oblimin")
+
+print(efa_3$loadings, cutoff = 0.3)
+
+```
+
