@@ -75,7 +75,7 @@ ggplot(cor_long, aes(Var1, Var2, fill = value)) +
 ```
 
 ```{r}
-# CFA
+# CFA - original preregistered model
 library(lavaan)
 
 # specify models
@@ -100,11 +100,11 @@ fit_2 <- cfa(model_2factor, data = hope_data, estimator = "MLR", missing = "fiml
 fit_1_result <- summary(fit_1, fit.measures = TRUE, standardized = TRUE)
 fit_2_result <- summary(fit_2, fit.measures = TRUE, standardized = TRUE)
 
-#fit measures
-rbind(
-  Model1 = fitMeasures(fit_1, c("cfi","tli","rmsea","srmr","aic","bic")),
-  Model2 = fitMeasures(fit_2, c("cfi","tli","rmsea","srmr","aic","bic"))
-)
+# #fit measures
+# rbind(
+#   Model1 = fitMeasures(fit_1, c("cfi","tli","rmsea","srmr","aic","bic")),
+#   Model2 = fitMeasures(fit_2, c("cfi","tli","rmsea","srmr","aic","bic"))
+# )
 
 ```
 
@@ -147,17 +147,13 @@ fit_1_re <- cfa(model_1factor_re, data = hope_data, estimator = "MLR", missing =
 fit_2_re <- cfa(model_2factor_re, data = hope_data, estimator = "MLR", missing = "fiml")
 
 # results
-fit_1_re_result <- summary(fit_1_exp, fit.measures = TRUE, standardized = TRUE)
-fit_2_re_result <- summary(fit_2_exp, fit.measures = TRUE, standardized = TRUE)
+fit_1_re_result <- summary(fit_1_re, fit.measures = TRUE, standardized = TRUE)
+fit_2_re_result <- summary(fit_2_re, fit.measures = TRUE, standardized = TRUE)
 
-#fit measures
-rbind(
-  Model1 = fitMeasures(fit_1_re, c("cfi","tli","rmsea","srmr","aic","bic")),
-  Model2 = fitMeasures(fit_2_re, c("cfi","tli","rmsea","srmr","aic","bic"))
-)
+# #fit measures
+# rbind(
+#   Model1 = fitMeasures(fit_1_re, c("cfi","tli","rmsea","srmr","aic","bic")),
+#   Model2 = fitMeasures(fit_2_re, c("cfi","tli","rmsea","srmr","aic","bic"))
+# )
 ```
-
-
-
-
 

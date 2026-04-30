@@ -1,0 +1,146 @@
+---
+title: "Regression"
+author: "Sam Yu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+
+```
+
+
+```{r}
+# define DV
+intention_items <- dat_clean8 %>%
+  select(paste0("action_intentions_", 1:15))
+
+alpha_dv <- alpha(intention_items)
+
+alpha_dv
+
+omega_dv <- omega(intention_items)
+
+omega_dv
+```
+
+```{r}
+# DV quality check
+# visualisation prepare
+intention_long <- dat_clean8 %>%
+  select(paste0("action_intentions_", 1:15)) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "item",
+    values_to = "score"
+  )
+```
+
+```{r}
+# histogram
+ggplot(intention_long, aes(x = score)) +
+  geom_bar() +
+  facet_wrap(~ item, ncol = 4) +
+  labs(
+    title = "Distribution of Intention Items",
+    x = "Response",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# boxplot
+ggplot(intention_long, aes(x = item, y = score)) +
+  geom_boxplot() +
+  labs(
+    title = "Boxplot of Intention Items",
+    x = "Item",
+    y = "Score"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+# zero order correlation 
+# create intention composite score
+
+dat_clean8$intention_composite <- rowMeans(intention_items)
+
+# hope x intention composite
+cor_hope_intention <- cor(
+  hope_data,
+  dat_clean8$intention_composite,
+  use = "pairwise.complete.obs"
+)
+
+cor_hope_intention
+
+# hope x intention items
+cor_matrix <- cor(
+  hope_data,
+  intention_items,
+  use = "pairwise.complete.obs"
+)
+
+cor_matrix
+
+```
+
+```{r}
+# item level regression
+# each item
+model_h1 <- lm(intention_composite ~ hope_1, data = dat_clean8)
+model_h2 <- lm(intention_composite ~ hope_2, data = dat_clean8)
+model_h3 <- lm(intention_composite ~ hope_3, data = dat_clean8)
+model_h4 <- lm(intention_composite ~ hope_4, data = dat_clean8)
+model_h5 <- lm(intention_composite ~ hope_5, data = dat_clean8)
+model_h6 <- lm(intention_composite ~ hope_6, data = dat_clean8)
+model_h7 <- lm(intention_composite ~ hope_7, data = dat_clean8)
+
+summary(model_h1)
+summary(model_h2)
+summary(model_h3)
+summary(model_h4)
+summary(model_h5)
+summary(model_h6)
+summary(model_h7)
+
+
+# overall
+model_all <- lm(intention_composite ~ hope_1 + hope_2 + hope_3 + hope_4 + hope_5 + hope_6 + hope_7,
+                data = dat_clean8)
+
+summary(model_all)
+```
+
+
+```{r}
+efa3 <- fa(hope_items, nfactors = 3, rotate = "oblimin", fm = "ml", scores = "regression")
+
+# Generating factor scores into the original dataframe
+hope_factor_scores <- as.data.frame(efa3$scores)
+
+dat_clean8 <- dat_clean8 %>%
+  bind_cols(hope_factor_scores)
+
+
+# renaming hope factors 
+dat_clean8 <- dat_clean8 %>%
+  rename(
+    Not_Hope = ML1,
+    Goal_Hope = ML2,
+    Action_Hope = ML3
+  )
+```
+
+```{r}
+# predicting action intention
+
+model_hope3 <- lm(
+  intention_composite ~ Not_Hope + Goal_Hope + Action_Hope,
+  data = dat_clean8
+)
+
+summary(model_hope3)
+```
+

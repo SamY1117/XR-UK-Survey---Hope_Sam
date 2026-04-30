@@ -15,26 +15,33 @@ library(naniar)
 ```
 
 ```{r}
-# formatting
+# Data loading & formatting
 
 raw <- read_csv("C:/Users/61457/Desktop/Masters/Internship/project/data/XR UK Survey Sam.csv",
                 show_col_types = FALSE)
 # clean names
 dat <- raw %>% clean_names()
 
-# Duplication detect
-# Detect duplicated responses based on participant_id_1:3
-dup_id <- dat %>%
-  mutate(id_combo = paste(participant_id_1, participant_id_2, participant_id_3, sep = "_")) %>%
-  filter(!is.na(participant_id_1) & !is.na(participant_id_2) & !is.na(participant_id_3)) %>%
+```
+
+```{r}
+dat <- dat %>%
+  mutate(
+    id_combo = if_else(
+      !is.na(participant_id_1) & !is.na(participant_id_2) & !is.na(participant_id_3),
+      paste(participant_id_1, participant_id_2, participant_id_3, sep = "_"),
+      NA_character_
+    )
+  ) %>%
   group_by(id_combo) %>%
-  filter(n() > 1) %>%
-  ungroup()
+  filter(
+    is.na(id_combo) |
+      row_number() == which.max(progress)
+  ) %>%
+  ungroup() %>%
+  select(-id_combo)
 
-# Number of duplicated rows
-n_dup <- nrow(dup_id)
-
-cat("Duplicated responses detected:", n_dup, "rows\n")
+cat("Rows after removing duplicated participants:", nrow(dat), "\n")
 ```
 
 
