@@ -9,7 +9,10 @@ output: html_document
 
 library(psych)
 
-hope_items <- dat_clean8 %>%
+
+dat_clean <- readRDS("../data/dat_clean.rds")
+
+hope_items <- dat_clean %>%
   select(paste0("hope_", 1:7))
 
 ```
@@ -21,7 +24,7 @@ KMO(hope_items)
 # determine the suitability of data for factor analysis by measuring the sampling suitability
 # result: acceptable as FA - mediocre 
 
-cortest.bartlett(hope_items)
+?cortest.bartlett(hope_items)
 # evaluates whether a correlation matrix differs significantly from an identity matrix, 
 # confirming if variables are sufficiently related to justify factor analysis
 # result: yes, the data is suitable for reduction
@@ -32,9 +35,6 @@ cortest.bartlett(hope_items)
 # parallel testing method
 fa.parallel(hope_items, fa = "fa", plot=TRUE, error.bars=TRUE, se.bars=TRUE)
 
-# >0.7 method
-sum(eigen(cor(hope_items, use = "pairwise.complete.obs"))$values > 0.7)
-
 # Minimum Average Partial and Very Simple Structure method
 VSS_result <- VSS(hope_items, n = 5, rotate = "oblimin")
 VSS_result
@@ -44,29 +44,44 @@ VSS_result
 
 ```{r}
 # EFA models
-efa1 <- fa(hope_items, nfactors = 1, rotate = "oblimin", fm = "ml")
+#efa1 <- fa(hope_items, nfactors = 1, rotate = "oblimin", fm = "ml")
 #efa2 <- fa(hope_items, nfactors = 2, rotate = "oblimin", fm = "ml")
 efa3 <- fa(hope_items, nfactors = 3, rotate = "oblimin", fm = "ml")
 
-fit_compare <- data.frame(
-  factors = c(1, 3),
-  TLI = c(efa1$TLI, efa3$TLI),
-  RMSEA = c(efa1$RMSEA[1], efa3$RMSEA[1]),
-  RMSR = c(efa1$rms, efa3$rms),
-  BIC = c(efa1$BIC, efa3$BIC)
-)
-
-fit_compare
+# fit_compare <- data.frame(
+#   factors = c(1, 3),
+#   TLI = c(efa1$TLI, efa3$TLI),
+#   RMSEA = c(efa1$RMSEA[1], efa3$RMSEA[1]),
+#   RMSR = c(efa1$rms, efa3$rms),
+#   BIC = c(efa1$BIC, efa3$BIC)
+# )
+# 
+# fit_compare
 
 # Compare loadings
-print(efa1$loadings, cutoff = .40)
-#print(efa2$loadings, cutoff = .30)
-print(efa3$loadings, cutoff = .40)
-
+#print(efa1$loadings, cutoff = .40)
+#print(efa2$loadings, cutoff = .40)
+print(efa3$loadings, cutoff = .30)
 
 # Factor correlations
 #efa2$Phi
 efa3$Phi
+
+# saving as csv
+efa_loading_table <- as.data.frame(unclass(efa3$loadings))
+efa_loading_table <- round(efa_loading_table, 3)
+
+efa_loading_table$item <- rownames(efa_loading_table)
+
+efa_loading_table <- efa_loading_table %>%
+  dplyr::select(item, dplyr::everything())
+
+write.csv(
+  efa_loading_table,
+  "efa_loading_table.csv",
+  row.names = FALSE
+)
+
 ```
 
 ```{r}
