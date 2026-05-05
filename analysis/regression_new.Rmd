@@ -6,6 +6,11 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+library(dplyr)
+library(broom)
+library(parameters)
+
+dat_clean <- readRDS("../data/dat_clean.rds")
 
 
 ```
@@ -13,22 +18,18 @@ output: html_document
 
 ```{r}
 # define DV
-intention_items <- dat_clean8 %>%
+intention_items <- dat_clean %>%
   select(paste0("action_intentions_", 1:15))
 
-alpha_dv <- alpha(intention_items)
+alpha(intention_items)
+omega(intention_items)
 
-alpha_dv
-
-omega_dv <- omega(intention_items)
-
-omega_dv
 ```
 
 ```{r}
-# DV quality check
+# DV inspection
 # visualisation prepare
-intention_long <- dat_clean8 %>%
+intention_long <- dat_clean %>%
   select(paste0("action_intentions_", 1:15)) %>%
   pivot_longer(
     cols = everything(),
@@ -62,40 +63,109 @@ ggplot(intention_long, aes(x = item, y = score)) +
 
 ```{r}
 # zero order correlation 
-# create intention composite score
+# Define item sets
+hope_items_4 <- c("hope_1", "hope_2", "hope_3", "hope_4")
 
-dat_clean8$intention_composite <- rowMeans(intention_items)
+action_items <- paste0("action_intentions_", 1:15)
 
-# hope x intention composite
-cor_hope_intention <- cor(
-  hope_data,
-  dat_clean8$intention_composite,
+# Create composites
+dat_clean <- dat_clean %>%
+  mutate(
+    hope_composite_4 = rowMeans(
+      select(., all_of(hope_items_4)),
+      na.rm = TRUE
+    ),
+    intention_composite = rowMeans(
+      select(., all_of(action_items)),
+      na.rm = TRUE
+    )
+  )
+
+
+# zero order correlation between hope composite and intention composite
+cor_composites <- cor.test(
+  dat_clean$hope_composite_4,
+  dat_clean$intention_composite,
   use = "pairwise.complete.obs"
 )
 
-cor_hope_intention
+cor_composites
 
-# hope x intention items
-cor_matrix <- cor(
-  hope_data,
-  intention_items,
+# zero order between hope items and intention items
+
+cor_hope_action_items <- cor(
+  dat_clean %>% select(all_of(hope_items_4)),
+  dat_clean %>% select(all_of(action_items)),
   use = "pairwise.complete.obs"
 )
 
-cor_matrix
+cor_hope_action_items
+
+# long format for visualisation
+cor_hope_action_long <- as.data.frame(cor_hope_action_items) %>%
+  rownames_to_column("hope_item") %>%
+  pivot_longer(
+    cols = -hope_item,
+    names_to = "action_item",
+    values_to = "correlation"
+  ) %>%
+  mutate(
+    correlation = round(correlation, 3)
+  )
 
 ```
 
 ```{r}
+# visualisation
+# hope composite and intentions composite
+ggplot(dat_clean, aes(x = hope_composite_4, y = intention_composite)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(
+    x = "General hope composite",
+    y = "Collective action intention composite",
+    title = "Association between general hope and action intentions"
+  ) +
+  theme_minimal()
+
+
+# Hope items and intentions items heatmap
+cor_hope_action_long <- cor_hope_action_long %>%
+  mutate(
+    action_item_short = gsub("action_intentions_", "AI", action_item),
+    hope_item_short = gsub("hope_", "H", hope_item)
+  )
+
+ggplot(cor_hope_action_long, aes(x = action_item_short, y = hope_item_short, fill = correlation)) +
+  geom_tile() +
+  geom_text(aes(label = correlation), size = 3) +
+  labs(
+    x = "Action intention items",
+    y = "Hope items",
+    fill = "r",
+    title = "Item-level correlations between hope and action intentions"
+  ) +
+  theme_minimal()
+
+
+```
+
+```{r}
+
+```
+
+
+
+```{r}
 # item level regression
 # each item
-model_h1 <- lm(intention_composite ~ hope_1, data = dat_clean8)
-model_h2 <- lm(intention_composite ~ hope_2, data = dat_clean8)
-model_h3 <- lm(intention_composite ~ hope_3, data = dat_clean8)
-model_h4 <- lm(intention_composite ~ hope_4, data = dat_clean8)
-model_h5 <- lm(intention_composite ~ hope_5, data = dat_clean8)
-model_h6 <- lm(intention_composite ~ hope_6, data = dat_clean8)
-model_h7 <- lm(intention_composite ~ hope_7, data = dat_clean8)
+model_h1 <- lm(intention_composite ~ hope_1, data = dat_clean)
+model_h2 <- lm(intention_composite ~ hope_2, data = dat_clean)
+model_h3 <- lm(intention_composite ~ hope_3, data = dat_clean)
+model_h4 <- lm(intention_composite ~ hope_4, data = dat_clean)
+model_h5 <- lm(intention_composite ~ hope_5, data = dat_clean)
+model_h6 <- lm(intention_composite ~ hope_6, data = dat_clean)
+model_h7 <- lm(intention_composite ~ hope_7, data = dat_clean)
 
 summary(model_h1)
 summary(model_h2)
@@ -108,24 +178,77 @@ summary(model_h7)
 
 # overall
 model_all <- lm(intention_composite ~ hope_1 + hope_2 + hope_3 + hope_4 + hope_5 + hope_6 + hope_7,
-                data = dat_clean8)
+                data = dat_clean)
 
 summary(model_all)
 ```
 
-
+# regression based on CFA (Hope composite)
 ```{r}
+# H2 confirmatory regression
+h2_model <- lm(
+  intention_composite ~ hope_composite_4,
+  data = dat_clean
+)
+
+summary(h2_model)
+
+# # stats extraction
+# h2_result_table <- tidy(h2_model, conf.int = TRUE) %>%
+#   filter(term == "hope_composite_4") %>%
+#   mutate(
+#     Predictor = "General hope",
+#     B = round(estimate, 3),
+#     SE = round(std.error, 3),
+#     t = round(statistic, 3),
+#     p = round(p.value, 3),
+#     CI_95 = paste0("[", round(conf.low, 3), ", ", round(conf.high, 3), "]")
+#   ) %>%
+#   select(Predictor, B, SE, t, p, CI_95)
+# 
+# h2_fit_table <- glance(h2_model) %>%
+#   mutate(
+#     N = nobs(h2_model),
+#     R2 = round(r.squared, 3),
+#     adj_R2 = round(adj.r.squared, 3),
+#     F = round(statistic, 3),
+#     p_model = round(p.value, 3)
+#   ) %>%
+#   select(N, R2, adj_R2, F, p_model, df, df.residual)
+# 
+# h2_result_table
+# h2_fit_table
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# regressiion based on EFA (Hope 3 factors)
+```{r}
+# regression based on EFA
 efa3 <- fa(hope_items, nfactors = 3, rotate = "oblimin", fm = "ml", scores = "regression")
 
 # Generating factor scores into the original dataframe
 hope_factor_scores <- as.data.frame(efa3$scores)
 
-dat_clean8 <- dat_clean8 %>%
+dat_clean <- dat_clean %>%
   bind_cols(hope_factor_scores)
 
 
 # renaming hope factors 
-dat_clean8 <- dat_clean8 %>%
+dat_clean <- dat_clean %>%
   rename(
     Not_Hope = ML1,
     Goal_Hope = ML2,
@@ -138,7 +261,7 @@ dat_clean8 <- dat_clean8 %>%
 
 model_hope3 <- lm(
   intention_composite ~ Not_Hope + Goal_Hope + Action_Hope,
-  data = dat_clean8
+  data = dat_clean
 )
 
 summary(model_hope3)

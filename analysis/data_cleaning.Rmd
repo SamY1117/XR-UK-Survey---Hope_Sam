@@ -103,7 +103,6 @@ ggplot(dat_clean1, aes(x = progress)) +
   labs(title = "Distribution of Progress", x = "Progress", y = "Count") +
   theme_minimal()
 
-
 ```
 
 ```{r}
@@ -160,7 +159,7 @@ dat_clean2 <- dat_clean2 %>%
 
 
 ```{r}
-# data quality: attention check  - output: dat_clean3
+# data quality: attention check  - failed/no reponse on attention check
 
 # sample size to start with
 n_before <- nrow(dat_clean2)
@@ -354,5 +353,8 @@ cat("Remaining:", n_after, "participants\n")
 ```
 ```{r}
 #write.csv(dat_clean8, "dat_clean8.csv", row.names = FALSE)
+
+# Save cleaned data as R object
+saveRDS(dat_clean8, "../data/dat_clean.rds")
 ```
 

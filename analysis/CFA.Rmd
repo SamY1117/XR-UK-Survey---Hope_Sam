@@ -12,10 +12,14 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(reshape2)
+library(lavaan)
+library(psych)
+
+dat_clean <- readRDS("../data/dat_clean.rds")
 
 hope_items <- paste0("hope_", 1:7)
 
-hope_long <- dat_clean8 %>%
+hope_long <- dat_clean %>%
   select(all_of(hope_items)) %>%
   pivot_longer(
     cols = everything(),
@@ -48,7 +52,7 @@ ggplot(hope_long, aes(x = item, y = score)) +
   theme_minimal()
 
 # Diagnosis
-dat_clean8 %>%
+dat_clean %>%
   summarise(across(all_of(hope_items),
                    list(mean = ~mean(.x, na.rm = TRUE),
                         sd = ~sd(.x, na.rm = TRUE))))
@@ -56,7 +60,7 @@ dat_clean8 %>%
 
 ```{r}
 # correlation matrix 
-hope_data <- dat_clean8 %>%
+hope_data <- dat_clean %>%
   select(all_of(hope_items))
 
 cor_matrix <- cor(hope_data, use = "pairwise.complete.obs")
@@ -76,7 +80,6 @@ ggplot(cor_long, aes(Var1, Var2, fill = value)) +
 
 ```{r}
 # CFA - original preregistered model
-library(lavaan)
 
 # specify models
 model_1factor <- '
@@ -88,17 +91,19 @@ Affective =~ hope_1 + hope_2 + hope_6 + hope_7
 Cognitive =~ hope_3 + hope_4 + hope_5
 '
 
-# test default for ordinal data
-#fit_1 <- cfa(model_1factor, data = hope_data, estimator = "WLSMV", missing = "pairwise")
-#fit_2 <- cfa(model_2factor, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+# test for ordinal, skewed data
+fit_1_wlsmv <- cfa(model_1factor, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+fit_2_wlsmv <- cfa(model_2factor, data = hope_data, estimator = "WLSMV", missing = "pairwise")
 
-# preregistered method
+# preregistered method suitable for 5-7 category and not skewed data. 
 fit_1 <- cfa(model_1factor, data = hope_data, estimator = "MLR", missing = "fiml")
 fit_2 <- cfa(model_2factor, data = hope_data, estimator = "MLR", missing = "fiml")
 
 # results
 fit_1_result <- summary(fit_1, fit.measures = TRUE, standardized = TRUE)
 fit_2_result <- summary(fit_2, fit.measures = TRUE, standardized = TRUE)
+fit_1wlsmv_result <- summary(fit_1_wlsmv, fit.measures = TRUE, standardized = TRUE)
+fit_2wlsmv_result <- summary(fit_2_wlsmv, fit.measures = TRUE, standardized = TRUE)
 
 # #fit measures
 # rbind(
@@ -110,8 +115,7 @@ fit_2_result <- summary(fit_2, fit.measures = TRUE, standardized = TRUE)
 
 ```{r}
 # reliability check
-library(psych)
-hope_items <- dat_clean8 %>%
+hope_items <- dat_clean %>%
   select(paste0("hope_", 1:7))
 
 alpha_iv <- alpha(hope_items)
@@ -126,21 +130,21 @@ alpha_iv$item.stats
 
 
 ```{r}
-# Deleting items with less than .4 factor loading (item 5 and 6)
+# Gradually deleting items with less than .4 factor loading (item 6 first)
 
 # specify models
 model_1factor_re <- '
-Hope =~ hope_1 + hope_2 + hope_3 + hope_4 + hope_7
+Hope =~ hope_1 + hope_2 + hope_3 + hope_4 + hope_5 + hope_7
 '
 
 model_2factor_re <- '
 Affective =~ hope_1 + hope_2 + hope_7
-Cognitive =~ hope_3 + hope_4
+Cognitive =~ hope_3 + hope_4 + hope_5
 '
 
 # test default for ordinal data
-#fit_1 <- cfa(model_1factor, data = hope_data, estimator = "WLSMV", missing = "pairwise")
-#fit_2 <- cfa(model_2factor, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+fit_1_wlsmv_re <- cfa(model_1factor_re, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+fit_2_wlsmv_re <- cfa(model_2factor_re, data = hope_data, estimator = "WLSMV", missing = "pairwise")
 
 # preregistered method
 fit_1_re <- cfa(model_1factor_re, data = hope_data, estimator = "MLR", missing = "fiml")
@@ -149,6 +153,9 @@ fit_2_re <- cfa(model_2factor_re, data = hope_data, estimator = "MLR", missing =
 # results
 fit_1_re_result <- summary(fit_1_re, fit.measures = TRUE, standardized = TRUE)
 fit_2_re_result <- summary(fit_2_re, fit.measures = TRUE, standardized = TRUE)
+fit_1wlsmv_re_result <- summary(fit_1_wlsmv_re, fit.measures = TRUE, standardized = TRUE)
+fit_2wlsmv_re_result <- summary(fit_2_wlsmv_re, fit.measures = TRUE, standardized = TRUE)
+
 
 # #fit measures
 # rbind(
@@ -156,4 +163,175 @@ fit_2_re_result <- summary(fit_2_re, fit.measures = TRUE, standardized = TRUE)
 #   Model2 = fitMeasures(fit_2_re, c("cfi","tli","rmsea","srmr","aic","bic"))
 # )
 ```
+
+```{r}
+# Gradually deleting items with less than .4 factor loading (item 5 then)
+
+# specify models
+model_1factor_re2 <- '
+Hope =~ hope_1 + hope_2 + hope_3 + hope_4 + hope_7
+'
+
+model_2factor_re2 <- '
+Affective =~ hope_1 + hope_2 + hope_7
+Cognitive =~ hope_3 + hope_4 
+'
+
+# test default for ordinal data
+fit_1_wlsmv_re2 <- cfa(model_1factor_re2, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+fit_2_wlsmv_re2 <- cfa(model_2factor_re2, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+
+# preregistered method
+fit_1_re2 <- cfa(model_1factor_re2, data = hope_data, estimator = "MLR", missing = "fiml")
+fit_2_re2 <- cfa(model_2factor_re2, data = hope_data, estimator = "MLR", missing = "fiml")
+
+# results
+fit_1_re2_result <- summary(fit_1_re2, fit.measures = TRUE, standardized = TRUE)
+fit_2_re2_result <- summary(fit_2_re2, fit.measures = TRUE, standardized = TRUE)
+fit_1wlsmv_re2_result <- summary(fit_1_wlsmv_re2, fit.measures = TRUE, standardized = TRUE)
+fit_2wlsmv_re2_result <- summary(fit_2_wlsmv_re2, fit.measures = TRUE, standardized = TRUE)
+
+
+# #fit measures
+# rbind(
+#   Model1 = fitMeasures(fit_1_re, c("cfi","tli","rmsea","srmr","aic","bic")),
+#   Model2 = fitMeasures(fit_2_re, c("cfi","tli","rmsea","srmr","aic","bic"))
+# )
+```
+
+```{r}
+# Gradually deleting items with less than .4 factor loading (item 7 last)
+
+# specify models
+model_1factor_re3 <- '
+Hope =~ hope_1 + hope_2 + hope_3 + hope_4
+'
+
+model_2factor_re3 <- '
+Affective =~ hope_1 + hope_2
+Cognitive =~ hope_3 + hope_4 
+'
+
+# test default for ordinal data
+fit_1_wlsmv_re3 <- cfa(model_1factor_re3, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+fit_2_wlsmv_re3 <- cfa(model_2factor_re3, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+
+# preregistered method
+fit_1_re3 <- cfa(model_1factor_re3, data = hope_data, estimator = "MLR", missing = "fiml")
+fit_2_re3 <- cfa(model_2factor_re3, data = hope_data, estimator = "MLR", missing = "fiml")
+
+# results
+fit_1_re3_result <- summary(fit_1_re3, fit.measures = TRUE, standardized = TRUE)
+fit_2_re3_result <- summary(fit_2_re3, fit.measures = TRUE, standardized = TRUE)
+fit_1wlsmv_re3_result <- summary(fit_1_wlsmv_re3, fit.measures = TRUE, standardized = TRUE)
+fit_2wlsmv_re3_result <- summary(fit_2_wlsmv_re3, fit.measures = TRUE, standardized = TRUE)
+
+# #fit measures
+# rbind(
+#   Model1 = fitMeasures(fit_1_re, c("cfi","tli","rmsea","srmr","aic","bic")),
+#   Model2 = fitMeasures(fit_2_re, c("cfi","tli","rmsea","srmr","aic","bic"))
+# )
+
+anova(fit_1_re3, fit_2_re3)
+anova(fit_1_wlsmv_re3, fit_2_wlsmv_re3)
+
+lavTestLRT(fit_1_re3, fit_2_re3, method = "satorra.bentler.2001")
+
+```
+
+```{r}
+# reading info from the 8 models. 
+library(dplyr)
+library(purrr)
+library(tibble)
+library(lavaan)
+
+# Put all CFA models into a named list
+cfa_models <- list(
+  "7-item | One-factor" = fit_1,
+  "7-item | Two-factor" = fit_2,
+  "6-item | One-factor" = fit_1_re,
+  "6-item | Two-factor" = fit_2_re,
+  "5-item | One-factor" = fit_1_re2,
+  "5-item | Two-factor" = fit_2_re2,
+  "4-item | One-factor" = fit_1_re3,
+  "4-item | Two-factor" = fit_2_re3
+)
+
+# Item information
+model_info <- tibble(
+  model_name = names(cfa_models),
+  model_version = c("7-item", "7-item", "6-item", "6-item",
+                    "5-item", "5-item", "4-item", "4-item"),
+  items_retained = c("1–7", "1–7",
+                     "1,2,3,4,6,7", "1,2,3,4,6,7",
+                     "1,2,3,4,7", "1,2,3,4,7",
+                     "1,2,3,4", "1,2,3,4"),
+  model = c("One-factor", "Two-factor",
+            "One-factor", "Two-factor",
+            "One-factor", "Two-factor",
+            "One-factor", "Two-factor")
+)
+
+# Extract fit indices
+fit_table <- map_dfr(names(cfa_models), function(nm) {
+  
+  fit <- cfa_models[[nm]]
+  
+  fm <- fitMeasures(
+    fit,
+    c("chisq.scaled", "df.scaled", "pvalue.scaled",
+      "cfi.robust", "tli.robust",
+      "rmsea.robust", "rmsea.ci.lower.robust", "rmsea.ci.upper.robust",
+      "srmr", "aic", "bic")
+  )
+  
+  tibble(
+    model_name = nm,
+    chi_square = fm["chisq.scaled"],
+    df = fm["df.scaled"],
+    p = fm["pvalue.scaled"],
+    CFI = fm["cfi.robust"],
+    TLI = fm["tli.robust"],
+    RMSEA = fm["rmsea.robust"],
+    RMSEA_90_CI = paste0(
+      round(fm["rmsea.ci.lower.robust"], 3),
+      "–",
+      round(fm["rmsea.ci.upper.robust"], 3)
+    ),
+    SRMR = fm["srmr"],
+    AIC = fm["aic"],
+    BIC = fm["bic"]
+  )
+})
+
+# Combine with model labels and round
+table_2 <- model_info %>%
+  left_join(fit_table, by = "model_name") %>%
+  select(
+    model_version,
+    items_retained,
+    model,
+    chi_square,
+    df,
+    p,
+    CFI,
+    TLI,
+    RMSEA,
+    RMSEA_90_CI,
+    SRMR,
+    AIC,
+    BIC
+  ) %>%
+  mutate(
+    across(c(chi_square, CFI, TLI, RMSEA, SRMR, AIC, BIC), ~ round(.x, 3)),
+    p = round(p, 3)
+  )
+
+table_2
+
+write.csv(table_2, "Fit indices across revised CFA models.csv", row.names = FALSE)
+
+```
+
 
