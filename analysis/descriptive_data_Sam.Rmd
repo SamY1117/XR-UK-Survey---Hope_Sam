@@ -156,59 +156,59 @@ mcar_results
 ```
 
 ```{r}
-# correlation
-hope_items <- dat_clean8 %>%
-  select(starts_with("hope_"))
-
-composites <- dat_desc %>%
-  select(intention, env_concern, social_id, anger, fear, joy,
-         hopeless, injustice, moral, collective_efficacy, self_efficacy)
-
-# r matrix
-cor_matrix <- cor(hope_items, composites, use = "pairwise.complete.obs")
-
-# p matrix
-p_matrix <- matrix(NA, nrow = ncol(hope_items), ncol = ncol(composites))
-rownames(p_matrix) <- colnames(hope_items)
-colnames(p_matrix) <- colnames(composites)
-
-for (i in 1:ncol(hope_items)) {
-  for (j in 1:ncol(composites)) {
-    p_matrix[i, j] <- cor.test(
-      hope_items[[i]],
-      composites[[j]],
-      use = "pairwise.complete.obs"
-    )$p.value
-  }
-}
-
-# melt
-cor_long <- melt(cor_matrix, varnames = c("Hope", "Composite"), value.name = "r")
-p_long   <- melt(p_matrix, varnames = c("Hope", "Composite"), value.name = "p")
-
-plot_df <- left_join(cor_long, p_long, by = c("Hope", "Composite")) %>%
-  mutate(
-    sig = case_when(
-      p < .001 ~ "***",
-      p < .01  ~ "**",
-      p < .05  ~ "*",
-      TRUE     ~ ""
-    ),
-    label = paste0(round(r, 2), sig)
-  )
-
-ggplot(plot_df, aes(x = Composite, y = Hope, fill = r)) +
-  geom_tile(color = "white") +
-  geom_text(aes(label = label), size = 3) +
-  scale_fill_gradient2(
-    low = "blue",
-    mid = "pink",
-    high = "red",
-    midpoint = 0
-  ) +
-  theme_minimal() +
-  labs(x = "Composite Variables", y = "Hope Items", fill = "r") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# # correlation
+# hope_items <- dat_clean8 %>%
+#   select(starts_with("hope_"))
+# 
+# composites <- dat_desc %>%
+#   select(intention, env_concern, social_id, anger, fear, joy,
+#          hopeless, injustice, moral, collective_efficacy, self_efficacy)
+# 
+# # r matrix
+# cor_matrix <- cor(hope_items, composites, use = "pairwise.complete.obs")
+# 
+# # p matrix
+# p_matrix <- matrix(NA, nrow = ncol(hope_items), ncol = ncol(composites))
+# rownames(p_matrix) <- colnames(hope_items)
+# colnames(p_matrix) <- colnames(composites)
+# 
+# for (i in 1:ncol(hope_items)) {
+#   for (j in 1:ncol(composites)) {
+#     p_matrix[i, j] <- cor.test(
+#       hope_items[[i]],
+#       composites[[j]],
+#       use = "pairwise.complete.obs"
+#     )$p.value
+#   }
+# }
+# 
+# # melt
+# cor_long <- melt(cor_matrix, varnames = c("Hope", "Composite"), value.name = "r")
+# p_long   <- melt(p_matrix, varnames = c("Hope", "Composite"), value.name = "p")
+# 
+# plot_df <- left_join(cor_long, p_long, by = c("Hope", "Composite")) %>%
+#   mutate(
+#     sig = case_when(
+#       p < .001 ~ "***",
+#       p < .01  ~ "**",
+#       p < .05  ~ "*",
+#       TRUE     ~ ""
+#     ),
+#     label = paste0(round(r, 2), sig)
+#   )
+# 
+# ggplot(plot_df, aes(x = Composite, y = Hope, fill = r)) +
+#   geom_tile(color = "white") +
+#   geom_text(aes(label = label), size = 3) +
+#   scale_fill_gradient2(
+#     low = "blue",
+#     mid = "pink",
+#     high = "red",
+#     midpoint = 0
+#   ) +
+#   theme_minimal() +
+#   labs(x = "Composite Variables", y = "Hope Items", fill = "r") +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 
