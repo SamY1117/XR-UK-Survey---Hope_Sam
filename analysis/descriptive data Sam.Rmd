@@ -7,14 +7,15 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-library(psych)      # descriptives + omega
-library(naniar)     # missing
+library(psych)     
+library(naniar)     
 library(ggplot2)
 library(corrplot)
 library(reshape2)
 library(dplyr)
 library(purrr)
 library(naniar)
+
 ```
 
 
@@ -155,26 +156,6 @@ mcar_results
 ```
 
 ```{r}
-# correlation matrix - Hope items
-cor_matrix <- cor(hope_items, use = "pairwise.complete.obs")
-cor_matrix[upper.tri(cor_matrix)] <- NA
-cor_matrix
-
-cor_long <- melt(cor_matrix, na.rm = TRUE)
-
-ggplot(cor_long, aes(Var1, Var2, fill = value)) +
-  geom_tile() +
-  geom_text(aes(label = round(value, 2))) +
-  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
-  theme_minimal() +
-  labs(title = "Correlation Matrix of Hope Items")
-
-```
-
-```{r}
-library(tidyverse)
-library(reshape2)
-
 # correlation
 hope_items <- dat_clean8 %>%
   select(starts_with("hope_"))

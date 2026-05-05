@@ -6,5 +6,51 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(tidyr)
+library(psych)
+library(broom)
+library(ggplot2)
+
+dat_clean <- readRDS("../data/dat_clean.rds")
+
+# Define item sets
+hope_items_all <- paste0("hope_", 1:7)
+action_items <- paste0("action_intentions_", 1:15)
+
+# Create intention composite
+dat_clean <- dat_clean %>%
+  mutate(
+    intention_composite = rowMeans(
+      select(., all_of(action_items)),
+      na.rm = TRUE
+    )
+  )
+
+# Prepare hope items for EFA
+hope_items <- dat_clean %>%
+  select(all_of(hope_items_all))
+
+# Three-factor EFA based on exploratory RQ1
+efa3 <- fa(
+  hope_items,
+  nfactors = 3,
+  rotate = "oblimin",
+  fm = "ml",
+  scores = "regression"
+)
+
+# Add factor scores to dataset
+hope_factor_scores <- as.data.frame(efa3$scores)
+
+dat_clean <- dat_clean %>%
+  bind_cols(hope_factor_scores) %>%
+  rename(
+    Passive_Hope = ML1,
+    Outcome_Hope = ML2,
+    Action_Hope = ML3
+  )
+
 ```
+
+
