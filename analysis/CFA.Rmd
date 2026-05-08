@@ -91,9 +91,9 @@ Affective =~ hope_1 + hope_2 + hope_6 + hope_7
 Cognitive =~ hope_3 + hope_4 + hope_5
 '
 
-# test for ordinal, skewed data
-fit_1_wlsmv <- cfa(model_1factor, data = hope_data, estimator = "WLSMV", missing = "pairwise")
-fit_2_wlsmv <- cfa(model_2factor, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+# # test for ordinal, skewed data
+# fit_1_wlsmv <- cfa(model_1factor, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+# fit_2_wlsmv <- cfa(model_2factor, data = hope_data, estimator = "WLSMV", missing = "pairwise")
 
 # preregistered method suitable for 5-7 category and not skewed data. 
 fit_1 <- cfa(model_1factor, data = hope_data, estimator = "MLR", missing = "fiml")
@@ -102,8 +102,8 @@ fit_2 <- cfa(model_2factor, data = hope_data, estimator = "MLR", missing = "fiml
 # results
 fit_1_result <- summary(fit_1, fit.measures = TRUE, standardized = TRUE)
 fit_2_result <- summary(fit_2, fit.measures = TRUE, standardized = TRUE)
-fit_1wlsmv_result <- summary(fit_1_wlsmv, fit.measures = TRUE, standardized = TRUE)
-fit_2wlsmv_result <- summary(fit_2_wlsmv, fit.measures = TRUE, standardized = TRUE)
+# fit_1wlsmv_result <- summary(fit_1_wlsmv, fit.measures = TRUE, standardized = TRUE)
+# fit_2wlsmv_result <- summary(fit_2_wlsmv, fit.measures = TRUE, standardized = TRUE)
 
 # #fit measures
 # rbind(
@@ -142,9 +142,9 @@ Affective =~ hope_1 + hope_2 + hope_7
 Cognitive =~ hope_3 + hope_4 + hope_5
 '
 
-# test default for ordinal data
-fit_1_wlsmv_re <- cfa(model_1factor_re, data = hope_data, estimator = "WLSMV", missing = "pairwise")
-fit_2_wlsmv_re <- cfa(model_2factor_re, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+# # test default for ordinal data
+# fit_1_wlsmv_re <- cfa(model_1factor_re, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+# fit_2_wlsmv_re <- cfa(model_2factor_re, data = hope_data, estimator = "WLSMV", missing = "pairwise")
 
 # preregistered method
 fit_1_re <- cfa(model_1factor_re, data = hope_data, estimator = "MLR", missing = "fiml")
@@ -153,8 +153,8 @@ fit_2_re <- cfa(model_2factor_re, data = hope_data, estimator = "MLR", missing =
 # results
 fit_1_re_result <- summary(fit_1_re, fit.measures = TRUE, standardized = TRUE)
 fit_2_re_result <- summary(fit_2_re, fit.measures = TRUE, standardized = TRUE)
-fit_1wlsmv_re_result <- summary(fit_1_wlsmv_re, fit.measures = TRUE, standardized = TRUE)
-fit_2wlsmv_re_result <- summary(fit_2_wlsmv_re, fit.measures = TRUE, standardized = TRUE)
+# fit_1wlsmv_re_result <- summary(fit_1_wlsmv_re, fit.measures = TRUE, standardized = TRUE)
+# fit_2wlsmv_re_result <- summary(fit_2_wlsmv_re, fit.measures = TRUE, standardized = TRUE)
 
 
 # #fit measures
@@ -177,9 +177,9 @@ Affective =~ hope_1 + hope_2 + hope_7
 Cognitive =~ hope_3 + hope_4 
 '
 
-# test default for ordinal data
-fit_1_wlsmv_re2 <- cfa(model_1factor_re2, data = hope_data, estimator = "WLSMV", missing = "pairwise")
-fit_2_wlsmv_re2 <- cfa(model_2factor_re2, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+# # test default for ordinal data
+# fit_1_wlsmv_re2 <- cfa(model_1factor_re2, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+# fit_2_wlsmv_re2 <- cfa(model_2factor_re2, data = hope_data, estimator = "WLSMV", missing = "pairwise")
 
 # preregistered method
 fit_1_re2 <- cfa(model_1factor_re2, data = hope_data, estimator = "MLR", missing = "fiml")
@@ -188,8 +188,8 @@ fit_2_re2 <- cfa(model_2factor_re2, data = hope_data, estimator = "MLR", missing
 # results
 fit_1_re2_result <- summary(fit_1_re2, fit.measures = TRUE, standardized = TRUE)
 fit_2_re2_result <- summary(fit_2_re2, fit.measures = TRUE, standardized = TRUE)
-fit_1wlsmv_re2_result <- summary(fit_1_wlsmv_re2, fit.measures = TRUE, standardized = TRUE)
-fit_2wlsmv_re2_result <- summary(fit_2_wlsmv_re2, fit.measures = TRUE, standardized = TRUE)
+# fit_1wlsmv_re2_result <- summary(fit_1_wlsmv_re2, fit.measures = TRUE, standardized = TRUE)
+# fit_2wlsmv_re2_result <- summary(fit_2_wlsmv_re2, fit.measures = TRUE, standardized = TRUE)
 
 
 # #fit measures
@@ -212,9 +212,9 @@ Affective =~ hope_1 + hope_2
 Cognitive =~ hope_3 + hope_4 
 '
 
-# test default for ordinal data
-fit_1_wlsmv_re3 <- cfa(model_1factor_re3, data = hope_data, estimator = "WLSMV", missing = "pairwise")
-fit_2_wlsmv_re3 <- cfa(model_2factor_re3, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+# # test default for ordinal data
+# fit_1_wlsmv_re3 <- cfa(model_1factor_re3, data = hope_data, estimator = "WLSMV", missing = "pairwise")
+# fit_2_wlsmv_re3 <- cfa(model_2factor_re3, data = hope_data, estimator = "WLSMV", missing = "pairwise")
 
 # preregistered method
 fit_1_re3 <- cfa(model_1factor_re3, data = hope_data, estimator = "MLR", missing = "fiml")
@@ -223,8 +223,8 @@ fit_2_re3 <- cfa(model_2factor_re3, data = hope_data, estimator = "MLR", missing
 # results
 fit_1_re3_result <- summary(fit_1_re3, fit.measures = TRUE, standardized = TRUE)
 fit_2_re3_result <- summary(fit_2_re3, fit.measures = TRUE, standardized = TRUE)
-fit_1wlsmv_re3_result <- summary(fit_1_wlsmv_re3, fit.measures = TRUE, standardized = TRUE)
-fit_2wlsmv_re3_result <- summary(fit_2_wlsmv_re3, fit.measures = TRUE, standardized = TRUE)
+# fit_1wlsmv_re3_result <- summary(fit_1_wlsmv_re3, fit.measures = TRUE, standardized = TRUE)
+# fit_2wlsmv_re3_result <- summary(fit_2_wlsmv_re3, fit.measures = TRUE, standardized = TRUE)
 
 # #fit measures
 # rbind(
@@ -233,9 +233,7 @@ fit_2wlsmv_re3_result <- summary(fit_2_wlsmv_re3, fit.measures = TRUE, standardi
 # )
 
 anova(fit_1_re3, fit_2_re3)
-anova(fit_1_wlsmv_re3, fit_2_wlsmv_re3)
-
-lavTestLRT(fit_1_re3, fit_2_re3, method = "satorra.bentler.2001")
+# anova(fit_1_wlsmv_re3, fit_2_wlsmv_re3)
 
 ```
 

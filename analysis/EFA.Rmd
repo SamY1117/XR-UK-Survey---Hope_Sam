@@ -24,7 +24,7 @@ KMO(hope_items)
 # determine the suitability of data for factor analysis by measuring the sampling suitability
 # result: acceptable as FA - mediocre 
 
-?cortest.bartlett(hope_items)
+cortest.bartlett(hope_items)
 # evaluates whether a correlation matrix differs significantly from an identity matrix, 
 # confirming if variables are sufficiently related to justify factor analysis
 # result: yes, the data is suitable for reduction
@@ -74,7 +74,7 @@ efa_loading_table <- round(efa_loading_table, 3)
 efa_loading_table$item <- rownames(efa_loading_table)
 
 efa_loading_table <- efa_loading_table %>%
-  dplyr::select(item, dplyr::everything())
+  select(item, everything())
 
 write.csv(
   efa_loading_table,

@@ -73,36 +73,28 @@ action_items <- paste0("action_intentions_", 1:15)
 # Intention composite: mean of 15 collective action intention items
 dat_clean <- dat_clean %>%
   mutate(
-    hope_valid_n = rowSums(!is.na(select(., all_of(hope_items_4)))),
-    intention_valid_n = rowSums(!is.na(select(., all_of(action_items)))),
-    
-    hope_composite_4 = if_else(
-      hope_valid_n >= 3,
-      rowMeans(select(., all_of(hope_items_4)), na.rm = TRUE),
-      NA_real_
+    hope_composite_4 = rowMeans(
+      select(., all_of(hope_items_4)),
+      na.rm = TRUE
     ),
     
-    intention_composite = if_else(
-      intention_valid_n >= 11,
-      rowMeans(select(., all_of(action_items)), na.rm = TRUE),
-      NA_real_
+    intention_composite = rowMeans(
+      select(., all_of(action_items)),
+      na.rm = TRUE
     )
   )
 
-# Data for composite-level correlation
-cor_composite_data <- dat_clean %>%
-  select(hope_composite_4, intention_composite) %>%
-  drop_na()
-
 # zero order correlation between hope composite and intention composite
 cor_composites <- cor.test(
-  cor_composite_data$hope_composite_4,
-  cor_composite_data$intention_composite,
+  dat_clean$hope_composite_4,
+  dat_clean$intention_composite,
   method = "pearson"
 )
 
 cor_composites
+```
 
+```{r}
 # Descriptive statistics for confirmatory H2 variables
 h2_desc_table <- dat_clean %>%
   select(hope_composite_4, intention_composite) %>%
@@ -347,8 +339,8 @@ dat_clean <- dat_clean %>%
 dat_clean <- dat_clean %>%
   rename(
     Passive_Hope = ML1,
-    Outcome_Hope = ML2,
-    Action_Hope = ML3
+    Outcome_Hope = ML3,
+    Action_Hope = ML2
   )
 ```
 
